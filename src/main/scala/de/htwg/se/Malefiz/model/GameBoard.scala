@@ -1,103 +1,46 @@
 package de.htwg.se.Malefiz.model
-
-import scala.collection.SortedMap
+import scala.collection.immutable.HashMap
+import scala.collection.mutable.Map
+import scala.util.Using
+import scala.io.Source
 import scala.io.Source
 
-case class GameBoard(playGround: Map[Cell, Set[Cell]]) {
+case class GameBoard() {
 
-  val graph = GameBoard(Nil -> Set(Nil))
+  def getCellList(filename: String): List[Cell] = {
+    val list = Source.fromFile(filename)
+    val inputData =  list.getLines
+      .map(line => line.split(" "))
+      .map{case Array(cellNumber, playerNumber, destination, wallPermission, hasWall, x, y) =>
+        Cell(cellNumber.toInt,
+          playerNumber.toInt,
+          destination.toBoolean,
+          wallPermission.toBoolean,
+          hasWall.toBoolean,
+          Point(x.toInt, y.toInt))}
+      .toList
+    list.close()
+    inputData
+  }
 
-  def readFromFile(path: String) : Map[Cell, Set[Cell]] = {
-    val configurationSource = Source.fromFile(path)
-    val lines = configurationSource.getLines()
-
+  def getCellGraph(in: String) : Map[Int, Set[Int]] = {
+    val source =Source.fromFile(in)
+    val lines = source.getLines()
+    val graph : Map[Int, Set[Int]] = Map.empty
     while (lines.hasNext) {
       val input = lines.next()
       val inputArray: Array[String] = input.split(" ")
-      val cellNumber = inputArray(0).toInt
-      val playerNumber = inputArray(1).toInt
-      val destination = inputArray(2).toBoolean
-      val wallPermission = inputArray(3).toBoolean
-      val wallSet = inputArray(4).toBoolean
-      val xCoordinate = inputArray(5).toInt
-      val yCoordinate = inputArray(6).toInt
-      val inputCell = Cell(cellNumber, playerNumber, destination, wallPermission, wallSet, Point(xCoordinate, yCoordinate))
-      addCell(inputCell)
+      for (i <- 1 until inputArray.length) {
+        updateCellGraph(inputArray(0).toInt, inputArray(i).toInt, graph)
+      }
     }
     graph
   }
-    def addCell(cell: Cell): Boolean = {
-      graph :+ (cell -> Set())
-      true
 
-    }
-
-    def containsCell(cell: Cell): Boolean = {
-      if (!graph.contains(cell)) {
-        false
-      }
-      true
-    }
-
-}
-/*
-  def generateListOfCells(path: String): List[Cell] = {
-    val configurationSource = Source.fromFile(path)
-    val lines = configurationSource.getLines()
-    val cellList: Vector[Cell] = {
-
-    }
-    while (lines.hasNext) {
-      val input = lines.next()
-      val inputArray: Array[String] = input.split(" ")
-      val cellNumber = inputArray(0).toInt
-      val playerNumber = inputArray(1).toInt
-      val destination = inputArray(2).toBoolean
-      val wallPermission = inputArray(3).toBoolean
-      val wallSet = inputArray(4).toBoolean
-      val xCoordinate = inputArray(5).toInt
-      val yCoordinate = inputArray(6).toInt
-      cellList  Cell(cellNumber, playerNumber, destination, wallPermission, wallSet, Point(xCoordinate, yCoordinate))
-    }
-    cellList
+  def updateCellGraph(key: Int, value: Int, map: Map[Int, Set[Int]]) : Map[Int, Set[Int]] = {
+    map.get(key)
+      .map(_=> map(key) += value)
+      .getOrElse(map(key) = Set[Int](value))
+    map
   }
 }
-
- */
-
-  /*
-  def generateGameBoardGraph(graphList: List[Cell], path: String) : SortedMap[Cell, Set[Cell]] = {
-    val configurationSource = Source.fromFile(path)
-    val lines = configurationSource.getLines()
-
-    val gameBoardGraph: SortedMap[Cell, Set[Cell]] = {
-
-      while(lines.hasNext) {
-        val input = lines.next
-        val inputArray : Array[String] = input.split(" ")
-        val num1 = inputArray(0).toInt
-        val num2 = inputArray(1).toInt
-
-        gameBoardGraph :+ graphList(num1) -> Set(graphList(num2))
-
-      }
-
-
-    }
-
-
-
-
-  }
-
-
-  val source = Source.fromFile("mainCellConfiguration.txt")
-  val lines = source.getLines()
-
-  while(lines.hasNext) {
-    val test = lines.map(lines => lines.split(" ")).toArray
-  }
-
-
-}
-*/
