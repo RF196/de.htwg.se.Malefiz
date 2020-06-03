@@ -1,8 +1,6 @@
 package de.htwg.se.Malefiz.model
-import scala.collection.immutable.HashMap
+
 import scala.collection.mutable.Map
-import scala.util.Using
-import scala.io.Source
 import scala.io.Source
 
 case class GameBoard() {
